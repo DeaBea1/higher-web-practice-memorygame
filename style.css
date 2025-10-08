@@ -1,0 +1,19 @@
+/* Базовые стили */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+  --main-color: rgba(8, 12, 22, 0.862);
+  --lighten-main-color: rgba(11, 20, 42, 0.775);
+  --card-front-color: #293852;
+  --accent-color: #0f1f4a;  /* также используется для цвета задней стороны карточки */
+  --lighten-accent-color: #2f5eac; /* также используется для цвета перевернутой карточки */
+  --select-color: #162859;
+  --body-background: linear-gradient(
+    135deg,
+    var(--lighten-main-color) 0%,
+    var(--main-color) 100%
+  );
+}
