@@ -11,8 +11,84 @@
       href="./style.css" />
   </head>
   <body class="body">
-    <script
-      type="text/javascript"
-      src="./game.js"></script>
+    <main class="page">
+      <h1 class="page__title">Игра «Память»</h1>
+
+      <section class="settings" id="settings" aria-label="Настройки игры">
+        <div class="settings__row">
+          <label class="settings__label" for="modeSelect">Режим</label>
+          <select class="settings__select" id="modeSelect" name="mode">
+            <option value="simple" selected>Простой</option>
+            <option value="attempts">На количество попыток</option>
+            <option value="time">На время</option>
+          </select>
+        </div>
+
+        <div class="settings__row">
+          <label class="settings__label" for="difficultySelect">Сложность</label>
+          <select class="settings__select" id="difficultySelect" name="difficulty">
+            <option value="easy" selected>Лёгкий (12 карточек)</option>
+            <option value="medium">Средний (16 карточек)</option>
+            <option value="hard">Сложный (24 карточки)</option>
+          </select>
+        </div>
+
+        <div class="settings__counter" aria-live="polite">
+          <div class="settings__counter-label" id="settingsCounterLabel">Время</div>
+          <div class="settings__counter-value" id="settingsCounterValue">00:00</div>
+        </div>
+
+        <button class="settings__start" type="button" id="startButton" disabled>
+          Начать новую игру
+        </button>
+      </section>
+
+      <section class="game is-hidden" id="game" aria-label="Игровое поле">
+        <div class="game__hud" aria-live="polite">
+          <div class="hud__item">
+            <div class="hud__label" id="hudLeftLabel">Время</div>
+            <div class="hud__value" id="hudLeftValue">00:00</div>
+          </div>
+          <div class="hud__item">
+            <div class="hud__label">Пары</div>
+            <div class="hud__value" id="pairsValue">0/0</div>
+          </div>
+          <div class="hud__item">
+            <div class="hud__label" id="hudRightLabel">Попытки</div>
+            <div class="hud__value" id="hudRightValue">—</div>
+          </div>
+        </div>
+
+        <div class="board" id="board" aria-label="Карточки"></div>
+
+        <div class="game__actions">
+          <button class="game__btn" type="button" id="newGameButton">Новая игра</button>
+          <button class="game__btn" type="button" id="backToSettingsButton">К настройкам</button>
+        </div>
+      </section>
+    </main>
+
+    <template id="cardTemplate">
+      <button class="card" type="button" aria-label="Карточка">
+        <span class="card__inner">
+          <span class="card__face card__face--back"></span>
+          <span class="card__face card__face--front"></span>
+        </span>
+      </button>
+    </template>
+
+    <div class="modal is-hidden" id="resultModal" role="dialog" aria-modal="true" aria-label="Результат игры">
+      <div class="modal__overlay" id="resultModalOverlay"></div>
+      <div class="modal__content" role="document">
+        <h2 class="modal__title" id="resultModalTitle">Результат</h2>
+        <div class="modal__body" id="resultModalBody"></div>
+        <div class="modal__actions">
+          <button class="modal__btn" type="button" id="resultModalRestart">Сыграть ещё раз</button>
+          <button class="modal__btn" type="button" id="resultModalToSettings">К настройкам</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="./game.js" defer></script>
   </body>
 </html>
