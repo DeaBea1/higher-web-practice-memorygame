@@ -389,6 +389,30 @@ function game() {
 
   function renderRecords() {
     const scores = getStoredScores();
+    const hasAnyRecords = Object.values(scores).some(
+      (entry) => entry && typeof entry.value === 'number' && Number.isFinite(entry.value)
+    );
+
+
+    if (!hasAnyRecords) {
+      const isGameVisible = !gameSection.classList.contains('is-hidden');
+      if (recordsSection && !isGameVisible) {
+        recordsSection.classList.remove('is-hidden');
+      }
+
+      resetRecordsButton.disabled = true;
+      recordsGrid.innerHTML =
+        '<div class="records__empty">Пока нет результатов. Сыграйте, чтобы появился первый рекорд.</div>';
+      return;
+    }
+
+    resetRecordsButton.disabled = false;
+
+    const isGameVisible = !gameSection.classList.contains('is-hidden');
+    if (recordsSection && !isGameVisible) {
+      recordsSection.classList.remove('is-hidden');
+    }
+
     recordsGrid.innerHTML = '';
 
     MODES.forEach((mode) => {
