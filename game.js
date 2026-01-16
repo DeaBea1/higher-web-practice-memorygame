@@ -2,9 +2,9 @@
  * Константы
  */
 const DIFFICULTY_SETTINGS = {
-  easy: { pairs: 6, attempts: 24, time: 60 },
-  medium: { pairs: 8, attempts: 28, time: 120 },
-  hard: { pairs: 12, attempts: 36, time: 120 },
+  easy: { pairs: 6, attempts: 24, time: 120 },
+  medium: { pairs: 8, attempts: 28, time: 180 },
+  hard: { pairs: 12, attempts: 36, time: 180 },
 };
 const ICONS_ARRAY = [
   '🐶',
@@ -24,6 +24,8 @@ const ICONS_ARRAY = [
   '🐵',
   '🐔',
 ];
+
+const STORAGE_KEY = 'memoryGame.bestScores.v1';
 
 /**
  * Основная функция игры
@@ -51,6 +53,9 @@ function game() {
   const newGameButton = document.querySelector('#newGameButton');
   const backToSettingsButton = document.querySelector('#backToSettingsButton');
 
+  const recordsGrid = document.querySelector('#recordsGrid');
+  const resetRecordsButton = document.querySelector('#resetRecordsButton');
+
   const resultModal = document.querySelector('#resultModal');
   const resultModalOverlay = document.querySelector('#resultModalOverlay');
   const resultModalTitle = document.querySelector('#resultModalTitle');
@@ -75,6 +80,8 @@ function game() {
     !cardTemplate ||
     !newGameButton ||
     !backToSettingsButton ||
+    !recordsGrid ||
+    !resetRecordsButton ||
     !resultModal ||
     !resultModalOverlay ||
     !resultModalTitle ||
@@ -99,6 +106,37 @@ function game() {
     timeRemainingSeconds: 0,
   };
 
+  const MODES = [
+    { id: 'simple', title: 'Простой' },
+    { id: 'attempts', title: 'На попытки' },
+    { id: 'time', title: 'На время' },
+  ];
+  const DIFFICULTIES = [
+    { id: 'easy', title: 'Лёгкий' },
+    { id: 'medium', title: 'Средний' },
+    { id: 'hard', title: 'Сложный' },
+  ];
+
+  function getComboKey(mode, difficulty) {
+    return `${mode}__${difficulty}`;
+  }
+
+  function getStoredScores() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return {};
+      const parsed = JSON.parse(raw);
+      if (!parsed || typeof parsed !== 'object') return {};
+      return parsed;
+    } catch {
+      return {};
+    }
+  }
+
+  function setStoredScores(scores) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(scores));
+  }
+
   function formatTime(seconds) {
     const safe = Math.max(0, Math.floor(seconds));
     const mm = String(Math.floor(safe / 60)).padStart(2, '0');
@@ -116,6 +154,12 @@ function game() {
     if (difficulty === 'medium') return 'Средний';
     if (difficulty === 'hard') return 'Сложный';
     return 'Лёгкий';
+  }
+
+  function getRecordSubtitle(mode) {
+    if (mode === 'attempts') return 'Минимум попыток';
+    if (mode === 'time') return 'Максимум остатка времени';
+    return 'Минимум времени прохождения';
   }
 
   function getElapsedSeconds() {
@@ -286,6 +330,101 @@ function game() {
     resultModal.classList.remove('is-hidden');
   }
 
+  function getScoreTypeByMode(mode) {
+    if (mode === 'time') return 'remainingSeconds';
+    if (mode === 'attempts') return 'attemptsUsed';
+    return 'completionSeconds';
+  }
+
+  function formatBestForMode(mode, value) {
+    if (typeof value !== 'number') return '—';
+    if (mode === 'attempts') return `${value} попыток`;
+    return formatTime(value);
+  }
+
+  function saveBestScore(mode, difficulty, value, valueType) {
+    const key = getComboKey(mode, difficulty);
+    const scores = getStoredScores();
+    const prev = scores[key];
+
+    const isValid = typeof value === 'number' && Number.isFinite(value);
+    if (!isValid) return null;
+
+    let isBetter = false;
+    if (!prev || typeof prev.value !== 'number') {
+      isBetter = true;
+    } else if (valueType === 'remainingSeconds') {
+      isBetter = value > prev.value;
+    } else {
+      isBetter = value < prev.value;
+    }
+
+    const bestValue = isBetter ? value : prev.value;
+
+    if (isBetter) {
+      scores[key] = {
+        mode,
+        difficulty,
+        type: valueType,
+        value,
+        updatedAt: Date.now(),
+      };
+      setStoredScores(scores);
+    }
+
+    return { isNewBest: isBetter, bestValue };
+  }
+
+  function getBestScore(mode, difficulty) {
+    const scores = getStoredScores();
+    const key = getComboKey(mode, difficulty);
+    const prev = scores[key];
+    if (!prev || typeof prev.value !== 'number') return null;
+    return prev.value;
+  }
+
+  function renderRecords() {
+    const scores = getStoredScores();
+    recordsGrid.innerHTML = '';
+
+    MODES.forEach((mode) => {
+      DIFFICULTIES.forEach((difficulty) => {
+        const key = getComboKey(mode.id, difficulty.id);
+        const entry = scores[key];
+
+        const card = document.createElement('div');
+        card.className = 'record';
+
+        const title = document.createElement('div');
+        title.className = 'record__title';
+        title.textContent = `${mode.title} · ${difficulty.title}`;
+
+        const value = document.createElement('div');
+        value.className = 'record__value';
+
+        if (!entry || typeof entry.value !== 'number') {
+          value.textContent = '—';
+        } else if (mode.id === 'attempts') {
+          value.textContent = `${entry.value} попыток`;
+        } else {
+          value.textContent = formatTime(entry.value);
+        }
+
+        const sub = document.createElement('div');
+        sub.className = 'record__sub';
+        sub.textContent = getRecordSubtitle(mode.id);
+
+        card.append(title, value, sub);
+        recordsGrid.append(card);
+      });
+    });
+  }
+
+  function resetRecords() {
+    localStorage.removeItem(STORAGE_KEY);
+    renderRecords();
+  }
+
 /**
  *  Функция начала игры
  */
@@ -437,6 +576,7 @@ function game() {
     const mode = getMode();
     const difficulty = getDifficulty();
     const settings = DIFFICULTY_SETTINGS[difficulty];
+    const valueType = getScoreTypeByMode(mode);
 
     let currentValue = 0;
     const metaText = `Режим: ${getModeTitle(mode)} · Сложность: ${getDifficultyTitle(difficulty)}`;
@@ -458,12 +598,38 @@ function game() {
       cards.push({ label: 'Время', value: formatTime(currentValue) });
     }
 
+    let bestInfo = null;
+    if (isWin) {
+      bestInfo = saveBestScore(mode, difficulty, currentValue, valueType);
+    } else {
+      const prevValue = getBestScore(mode, difficulty);
+      if (typeof prevValue === 'number') {
+        bestInfo = { isNewBest: false, bestValue: prevValue };
+      }
+    }
+
+    if (bestInfo && typeof bestInfo.bestValue === 'number') {
+      cards.push({
+        label: 'Лучший результат',
+        value: formatBestForMode(mode, bestInfo.bestValue),
+        note: bestInfo.isNewBest ? 'Новый рекорд!' : '',
+      });
+    } else {
+      cards.push({ label: 'Лучший результат', value: '—' });
+    }
+
     setModalContent({
       title: isWin ? 'Победа!' : 'Поражение',
       isWin,
       metaText,
       cards,
     });
+
+    renderRecords();
+  }
+
+  function loadBestScores() {
+    renderRecords();
   }
 
 // Сброс игры
@@ -514,8 +680,11 @@ function game() {
     setView(false);
   });
 
+  resetRecordsButton.addEventListener('click', resetRecords);
+
   setView(false);
   updateTimeDisplay();
+  loadBestScores();
 }
 
 document.addEventListener('DOMContentLoaded', () => game());
