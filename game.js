@@ -37,6 +37,7 @@ function game() {
 
   const settingsSection = document.querySelector('#settings');
   const gameSection = document.querySelector('#game');
+  const recordsSection = document.querySelector('#records');
 
   const settingsCounterLabel = document.querySelector('#settingsCounterLabel');
   const settingsCounterValue = document.querySelector('#settingsCounterValue');
@@ -244,6 +245,9 @@ function game() {
   function setView(isGameVisible) {
     settingsSection.classList.toggle('is-hidden', isGameVisible);
     gameSection.classList.toggle('is-hidden', !isGameVisible);
+    if (recordsSection) {
+      recordsSection.classList.toggle('is-hidden', isGameVisible);
+    }
   }
 
   function stopTick() {
@@ -460,7 +464,8 @@ function game() {
     const deck = shuffle([...icons, ...icons]);
 
     board.innerHTML = '';
-    board.style.setProperty('--cols', String(getColumnsByDifficulty(difficulty)));
+    const cols = getColumnsByDifficulty(difficulty);
+    board.style.setProperty('--cols', String(cols));
 
     deck.forEach((icon) => {
       const fragment = cardTemplate.content.cloneNode(true);
@@ -650,17 +655,23 @@ function game() {
     updateTimeDisplay();
   }
 
-  startButton.disabled = true;
+  function unlockStartButton() {
+    startButton.disabled = false;
+  }
 
   modeSelect.addEventListener('change', () => {
-    startButton.disabled = false;
+    unlockStartButton();
+    updateTimeDisplay();
+  });
+  difficultySelect.addEventListener('change', () => {
+    unlockStartButton();
     updateTimeDisplay();
   });
 
-  difficultySelect.addEventListener('change', () => {
-    startButton.disabled = false;
-    updateTimeDisplay();
-  });
+  modeSelect.addEventListener('focus', unlockStartButton, { once: true });
+  difficultySelect.addEventListener('focus', unlockStartButton, { once: true });
+  modeSelect.addEventListener('click', unlockStartButton, { once: true });
+  difficultySelect.addEventListener('click', unlockStartButton, { once: true });
 
   startButton.addEventListener('click', startGame);
   newGameButton.addEventListener('click', startGame);

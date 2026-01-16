@@ -5,17 +5,20 @@
   padding: 0;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 
-  --main-color: rgba(8, 12, 22, 0.862);
-  --lighten-main-color: rgba(11, 20, 42, 0.775);
-  --card-front-color: #293852;
-  --accent-color: #0f1f4a;  /* также используется для цвета задней стороны карточки */
-  --lighten-accent-color: #2f5eac; /* также используется для цвета перевернутой карточки */
-  --select-color: #162859;
-  --body-background: linear-gradient(
-    135deg,
-    var(--lighten-main-color) 0%,
-    var(--main-color) 100%
-  );
+  /* Палитра (ближе к референсу из ТЗ) */
+  --main-color: #070b14;
+  --lighten-main-color: #0a1326;
+  --card-front-color: #0b1f4a;
+  --accent-color: #0b2a78; /* back */
+  --lighten-accent-color: #2f5eac; /* active */
+  --select-color: #0a1a3f;
+  --body-background: radial-gradient(
+      900px 520px at 35% 0%,
+      rgba(47, 94, 172, 0.22),
+      transparent 60%
+    ),
+    radial-gradient(900px 520px at 90% 30%, rgba(255, 255, 255, 0.08), transparent 55%),
+    linear-gradient(135deg, var(--lighten-main-color) 0%, var(--main-color) 100%);
 
   --text: rgba(255, 255, 255);
   --muted: rgba(255, 255, 255, 0.7);
@@ -24,6 +27,8 @@
   --shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
   --radius: 18px;
   --focus: 0 0 0 3px rgba(47, 94, 172, 0.55);
+  --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.25);
+  --shadow-float: 0 12px 28px rgba(0, 0, 0, 0.34);
 }
 
 html,
@@ -37,7 +42,7 @@ body {
 }
 
 .page {
-  max-width: 1100px;
+  max-width: 980px;
   margin: 0 auto;
   padding: 22px 16px 28px;
 }
@@ -47,6 +52,7 @@ body {
   font-weight: 760;
   letter-spacing: 0.2px;
   margin-bottom: 16px;
+  text-align: center;
 }
 
 .settings {
@@ -222,6 +228,9 @@ body {
   grid-template-columns: 1fr 1fr 1fr;
   gap: 12px;
   margin-bottom: 12px;
+  width: min(100%, 760px);
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .hud__item {
@@ -253,6 +262,8 @@ body {
   background: var(--glass);
   border: 1px solid var(--glass-border);
   box-shadow: var(--shadow);
+  width: min(100%, 760px);
+  margin: 0 auto;
 }
 
 .game__actions {
@@ -261,6 +272,9 @@ body {
   gap: 10px;
   justify-content: flex-end;
   flex-wrap: wrap;
+  width: min(100%, 760px);
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .game__btn {
@@ -321,12 +335,14 @@ body {
 }
 
 .card__face--back {
-  background: radial-gradient(circle at 30% 20%, rgba(47, 94, 172, 0.9), rgba(15, 31, 74, 0.95));
+  background: radial-gradient(circle at 30% 20%, rgba(47, 94, 172, 0.65), rgba(11, 31, 74, 0.98));
 }
 
 .card__face--front {
   transform: rotateY(180deg);
-  background: radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.12), rgba(41, 56, 82, 0.65));
+  background: radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.10), rgba(11, 31, 74, 0.72));
+  font-size: 44px;
+  line-height: 1;
 }
 
 .card.is-flipped .card__inner {
